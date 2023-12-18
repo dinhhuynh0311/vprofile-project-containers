@@ -1,0 +1,51 @@
+version: '1.0'
+services:
+  vprodb: # By default this will be part of the contatiner name (e.g compose_vprodb_1)
+    build: 
+      context: ./Docker-files/db
+    image: dinhcrayon/vprofiledb # Image name when building the image
+    container_name: vprodb # container name when running the image
+    ports:
+      - "3306:3306"
+    volumes:
+      - vprodbdata:/var/lib/mysql # volume parts (vprodbdata) will need to be mentioned below in this compose file
+    environment: # check images documentations for instructions
+      - MYSQL_ROOT_PASSWORD=vprodbpass
+
+  vprocache01:
+    image: memcached
+    ports:
+      - "11211:11211"
+    container_name: vprocache01
+
+  vpromq01:
+    image: rabbitmq
+    ports:
+      - "15672:15672"
+    container_name: vpromq01
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+  
+  vproapp:
+    build: 
+      context: ./Docker-files/app
+    image: dinhcrayon/vprofileapp
+    container_name: vproapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps
+
+  vproweb:
+    build: 
+      context: ./Docker-files/web
+    image: dinhcrayon/vprofileweb
+    container_name: vproweb
+    ports:
+      - "80:80"
+
+volumes:
+  vprodbdata: {}
+  vproappdata: {} #create a volume in the Docker Engine it self
+  
